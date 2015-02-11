@@ -143,26 +143,26 @@ namespace ICSharpCode.ILSpy.AvalonEdit
 		/// Creates a new text marker. The text marker will be invisible at first,
 		/// you need to set one of the Color properties to make it visible.
 		/// </summary>
-		ITextMarker Create(int startOffset, int length);
+        ICSharpCode.ILSpy.AvalonEdit.ITextMarker Create(int startOffset, int length);
 		
 		/// <summary>
 		/// Gets the list of text markers.
 		/// </summary>
-		IEnumerable<ITextMarker> TextMarkers { get; }
+        IEnumerable<ICSharpCode.ILSpy.AvalonEdit.ITextMarker> TextMarkers { get; }
 		
 		/// <summary>
 		/// Removes the specified text marker.
 		/// </summary>
-		void Remove(ITextMarker marker);
+        void Remove(ICSharpCode.ILSpy.AvalonEdit.ITextMarker marker);
 		
 		/// <summary>
 		/// Removes all text markers that match the condition.
 		/// </summary>
-		void RemoveAll(Predicate<ITextMarker> predicate);
+        void RemoveAll(Predicate<ICSharpCode.ILSpy.AvalonEdit.ITextMarker> predicate);
 		
 		/// <summary>
 		/// Finds all text markers at the specified offset.
 		/// </summary>
-		IEnumerable<ITextMarker> GetMarkersAtOffset(int offset);
+        IEnumerable<ICSharpCode.ILSpy.AvalonEdit.ITextMarker> GetMarkersAtOffset(int offset);
 	}
 }
