@@ -19,3 +19,5 @@ ILSpy Contributors:
 	Artur Zgodzinski
 	Eusebiu Marcu
 	Pent Ploompuu
+
+yeaicc：added the debugger
