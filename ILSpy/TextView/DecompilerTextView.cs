@@ -78,6 +78,9 @@ namespace ICSharpCode.ILSpy.TextView
         readonly ICSharpCode.ILSpy.AvalonEdit.TextMarkerService textMarkerService;
         readonly List<ICSharpCode.ILSpy.AvalonEdit.ITextMarker> localReferenceMarks = new List<ICSharpCode.ILSpy.AvalonEdit.ITextMarker>();
 
+        [ImportMany(typeof(ITextEditorListener))]
+        IEnumerable<ITextEditorListener> textEditorListeners = null;
+
         #region Constructor
         public DecompilerTextView()
         {
@@ -94,6 +97,7 @@ namespace ICSharpCode.ILSpy.TextView
                     }
                 });
 
+            this.Loaded += DecompilerTextView_Loaded;
             InitializeComponent();
 
             this.referenceElementGenerator = new ReferenceElementGenerator(this.JumpToReference, this.IsLink);
@@ -125,6 +129,30 @@ namespace ICSharpCode.ILSpy.TextView
             ShowLineMargin();
 
             // add marker service & margin
+            textEditor.TextArea.TextView.BackgroundRenderers.Add(textMarkerService);
+            textEditor.TextArea.TextView.LineTransformers.Add(textMarkerService);
+
+            this.Loaded += DecompilerTextView_Loaded;
+        }
+
+        void DecompilerTextView_Loaded(object sender, RoutedEventArgs e)
+        {
+            ShowLineMargin();
+
+            // wire the events
+            if (textEditorListeners != null)
+            {
+                foreach (var listener in textEditorListeners)
+                {
+                    ICSharpCode.ILSpy.AvalonEdit.TextEditorWeakEventManager.MouseHover.AddListener(textEditor, listener);
+                    ICSharpCode.ILSpy.AvalonEdit.TextEditorWeakEventManager.MouseHoverStopped.AddListener(textEditor, listener);
+                    ICSharpCode.ILSpy.AvalonEdit.TextEditorWeakEventManager.MouseDown.AddListener(textEditor, listener);
+                }
+            }
+            textEditor.TextArea.TextView.VisualLinesChanged += (s, _) => iconMargin.InvalidateVisual();
+
+            // add marker service & margin
+            textMarkerService.CodeEditor = textEditor;
             textEditor.TextArea.TextView.BackgroundRenderers.Add(textMarkerService);
             textEditor.TextArea.TextView.LineTransformers.Add(textMarkerService);
         }
@@ -495,6 +523,15 @@ namespace ICSharpCode.ILSpy.TextView
 
         Task DoDecompile(DecompilationContext context, int outputLengthLimit)
         {
+            // close popup
+            if (textEditorListeners != null)
+            {
+                foreach (var listener in textEditorListeners)
+                {
+                    listener.ClosePopup();
+                }
+            }
+
             return RunWithCancellation(
                 delegate(CancellationToken ct)
                 { // creation of the background task
